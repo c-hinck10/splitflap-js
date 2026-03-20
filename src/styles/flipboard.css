@@ -6,6 +6,7 @@
   --fb-board-highlight: radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent 35%);
   --fb-board-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 25%);
   --fb-board-background: var(--fb-board-highlight), var(--fb-board-sheen), var(--fb-bg);
+  --fb-board-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --fb-text: #f3ecd8;
   --fb-muted: #7b7b7b;
   --fb-accent: #d9bc79;
@@ -31,7 +32,7 @@
   border-radius: calc(var(--fb-radius) + 4px);
   background: var(--fb-board-background);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    var(--fb-board-inset-shadow),
     var(--fb-board-shadow, 0 20px 50px var(--fb-shadow));
 }
 
@@ -62,15 +63,15 @@
   --fb-tile-inset-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     inset 0 -1px 0 rgba(0, 0, 0, 0.5);
-  --fb-tile-drop-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-  --fb-tile-shadow-default: var(--fb-tile-inset-shadow), var(--fb-tile-drop-shadow);
+  --fb-tile-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  --fb-flap-background: var(--fb-tile-background);
   position: relative;
   aspect-ratio: var(--fb-tile-aspect);
   min-width: 0;
   overflow: hidden;
   border-radius: var(--fb-radius);
   background: var(--fb-tile-background);
-  box-shadow: var(--fb-tile-shadow, var(--fb-tile-shadow-default));
+  box-shadow: var(--fb-tile-inset-shadow), var(--fb-tile-shadow);
   color: var(--fb-cell-text);
   font-family: var(--fb-font-family);
   font-size: var(--fb-font-size);
@@ -134,6 +135,7 @@
   inset-inline: 0;
   backface-visibility: hidden;
   overflow: hidden;
+  background: var(--fb-flap-background);
 }
 
 .fb-top,

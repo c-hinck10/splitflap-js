@@ -152,9 +152,11 @@ For flatter or more custom boards, you can also override the packaged gloss and 
 ```css
 .hero-board-wrap {
   --fb-board-background: #f7f7f5;
+  --fb-board-inset-shadow: none;
   --fb-tile-background: var(--fb-tile-bg);
   --fb-tile-inset-shadow: none;
-  --fb-tile-drop-shadow: none;
+  --fb-tile-shadow: none;
+  --fb-flap-background: var(--fb-tile-background);
 }
 ```
 
@@ -272,9 +274,12 @@ Import `@c-hinck10/splitflap-js/styles.css`, then override the board variables o
   --fb-letter-spacing: 0.03em;
   --fb-tile-aspect: 1 / 1;
   --fb-board-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
-  --fb-tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  --fb-board-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --fb-tile-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --fb-tile-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
   --fb-board-background: #111;
   --fb-tile-background: var(--fb-tile-bg);
+  --fb-flap-background: var(--fb-tile-background);
 }
 ```
 
@@ -287,9 +292,10 @@ Useful visual-tuning variables:
 - `--fb-tile-aspect`
 - `--fb-radius`
 - `--fb-gap`
+- `--fb-board-inset-shadow`
 - `--fb-board-shadow`
 - `--fb-tile-shadow`
 - `--fb-tile-inset-shadow`
-- `--fb-tile-drop-shadow`
 - `--fb-board-background`
 - `--fb-tile-background`
+- `--fb-flap-background`
