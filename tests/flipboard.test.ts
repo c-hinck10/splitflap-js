@@ -322,6 +322,43 @@ describe('Flipboard', () => {
     board.destroy();
   });
 
+  it('allows the tile shadow to be disabled', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      tileShadow: false
+    });
+
+    const renderedBoard = container.querySelector('.fb-board') as HTMLDivElement;
+    expect(renderedBoard.style.getPropertyValue('--fb-tile-shadow')).toBe('none');
+
+    board.destroy();
+  });
+
+  it('allows the tile shadow to be customized', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      tileShadow:
+        'inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.18)'
+    });
+
+    const renderedBoard = container.querySelector('.fb-board') as HTMLDivElement;
+    expect(renderedBoard.style.getPropertyValue('--fb-tile-shadow')).toBe(
+      'inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.18)'
+    );
+
+    board.destroy();
+  });
+
   it('continues from the last visible page state instead of resetting between pages', async () => {
     vi.useFakeTimers();
 

@@ -19,6 +19,9 @@ const presetInput = document.getElementById('preset') as HTMLSelectElement;
 const messagesInput = document.getElementById('messages') as HTMLTextAreaElement;
 const sizeInput = document.getElementById('size') as HTMLSelectElement;
 const triggerInput = document.getElementById('trigger') as HTMLSelectElement;
+const previewStyleInput = document.getElementById(
+  'previewStyle'
+) as HTMLSelectElement;
 const staggerModeInput = document.getElementById(
   'staggerMode'
 ) as HTMLSelectElement;
@@ -38,9 +41,12 @@ const resetButton = document.getElementById('reset') as HTMLButtonElement;
 
 const boardHost = boardElement as HTMLElement;
 const statusHost = statusElement as HTMLElement;
+const shellElement = document.querySelector('.demo-shell') as HTMLElement;
+const panelElement = document.querySelector('.demo-panel') as HTMLElement;
 
 let board = createBoard();
 syncPresetUI();
+applyPreviewStyle();
 
 function createMessages(): string[] {
   return messagesInput.value
@@ -233,6 +239,11 @@ function createBoard(): Flipboard {
     flipDuration: Number(flipDurationInput.value),
     autoplay: autoplayInput.checked,
     pageDuration: Number(pageDurationInput.value),
+    shadow: previewStyleInput.value === 'page-light' ? false : true,
+    tileShadow:
+      previewStyleInput.value === 'page-light'
+        ? 'inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.14)'
+        : true,
     loop: true,
     onComplete: (message, index) => {
       statusHost.textContent = `Completed "${message}" at index ${index}`;
@@ -242,6 +253,7 @@ function createBoard(): Flipboard {
 
 function rebuildBoard(): void {
   board.destroy();
+  applyPreviewStyle();
   board = createBoard();
   statusHost.textContent = 'Board rebuilt';
 }
@@ -251,6 +263,41 @@ function syncPresetUI(): void {
     presetInput.value === 'menu' || presetInput.value === 'kids' || presetInput.value === 'event'
       ? '6x22'
       : sizeInput.value;
+}
+
+function applyPreviewStyle(): void {
+  const lightMode = previewStyleInput.value === 'page-light';
+  shellElement.dataset.previewStyle = previewStyleInput.value;
+  panelElement.dataset.previewStyle = previewStyleInput.value;
+  boardHost.dataset.previewStyle = previewStyleInput.value;
+
+  if (lightMode) {
+    boardHost.style.setProperty('--fb-bg', '#f7f7f5');
+    boardHost.style.setProperty('--fb-tile-bg', '#efefed');
+    boardHost.style.setProperty('--fb-tile-blank', '#efefed');
+    boardHost.style.setProperty('--fb-text', '#171717');
+    boardHost.style.setProperty('--fb-line-color', 'rgba(0, 0, 0, 0.12)');
+    boardHost.style.setProperty('--fb-gap', '2px');
+    boardHost.style.setProperty('--fb-radius', '0px');
+    boardHost.style.setProperty('--fb-font-size', 'clamp(18px, 2vw, 28px)');
+    boardHost.style.setProperty('--fb-board-shadow', 'none');
+    boardHost.style.setProperty(
+      '--fb-tile-shadow',
+      'inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.14)'
+    );
+    return;
+  }
+
+  boardHost.style.setProperty('--fb-bg', '#15130f');
+  boardHost.style.setProperty('--fb-tile-bg', '#201c16');
+  boardHost.style.removeProperty('--fb-tile-blank');
+  boardHost.style.setProperty('--fb-text', '#f6f0df');
+  boardHost.style.removeProperty('--fb-line-color');
+  boardHost.style.setProperty('--fb-gap', '10px');
+  boardHost.style.setProperty('--fb-radius', '10px');
+  boardHost.style.setProperty('--fb-font-size', 'clamp(22px, 2.7vw, 34px)');
+  boardHost.style.removeProperty('--fb-board-shadow');
+  boardHost.style.removeProperty('--fb-tile-shadow');
 }
 
 applyButton.addEventListener('click', () => {
@@ -284,6 +331,7 @@ presetInput.addEventListener('change', () => {
   rebuildBoard();
 });
 
+previewStyleInput.addEventListener('change', rebuildBoard);
 triggerInput.addEventListener('change', rebuildBoard);
 sizeInput.addEventListener('change', rebuildBoard);
 staggerModeInput.addEventListener('change', rebuildBoard);

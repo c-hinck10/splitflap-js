@@ -52,6 +52,10 @@
 .fb-tile {
   --fb-cell-bg: var(--fb-tile-bg);
   --fb-cell-text: var(--fb-text);
+  --fb-tile-shadow-default:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 8px 18px rgba(0, 0, 0, 0.25);
   position: relative;
   aspect-ratio: var(--fb-tile-aspect);
   min-width: 0;
@@ -60,10 +64,7 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 30%),
     linear-gradient(180deg, color-mix(in srgb, var(--fb-cell-bg) 88%, white) 0%, var(--fb-cell-bg) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
-    0 8px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--fb-tile-shadow, var(--fb-tile-shadow-default));
   color: var(--fb-cell-text);
   font-family: var(--fb-font-family);
   font-size: var(--fb-font-size);

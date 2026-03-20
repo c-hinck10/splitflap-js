@@ -44,6 +44,7 @@ export type FlipboardOptions = {
   charset?: string;
   faces?: FlipboardFace[];
   shadow?: boolean | string;
+  tileShadow?: boolean | string;
   loop?: boolean;
   autoplay?: boolean;
   pageDuration?: number;
@@ -72,6 +73,7 @@ export const DEFAULT_OPTIONS: Required<Omit<FlipboardOptions, 'onComplete'>> = {
   charset: DEFAULT_CHARSET,
   faces: [],
   shadow: true,
+  tileShadow: true,
   loop: false,
   autoplay: false,
   pageDuration: 3000,
@@ -117,6 +119,7 @@ export class Flipboard {
       `${this.options.flipDuration}ms`
     );
     applyBoardShadow(this.board, this.options.shadow);
+    applyTileShadow(this.board, this.options.tileShadow);
 
     this.srText = document.createElement('span');
     this.srText.className = 'fb-sr-only';
@@ -446,6 +449,23 @@ function applyBoardShadow(
   }
 
   board.style.removeProperty('--fb-board-shadow');
+}
+
+function applyTileShadow(
+  board: HTMLDivElement,
+  shadow: boolean | string | undefined
+): void {
+  if (shadow === false) {
+    board.style.setProperty('--fb-tile-shadow', 'none');
+    return;
+  }
+
+  if (typeof shadow === 'string' && shadow.trim().length > 0) {
+    board.style.setProperty('--fb-tile-shadow', shadow);
+    return;
+  }
+
+  board.style.removeProperty('--fb-tile-shadow');
 }
 
 function emptyCell(): FlipboardCell {

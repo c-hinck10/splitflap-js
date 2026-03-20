@@ -99,6 +99,7 @@ type FlipboardOptions = {
   charset?: string;
   faces?: FlipboardFace[];
   shadow?: boolean | string;
+  tileShadow?: boolean | string;
   loop?: boolean;
   autoplay?: boolean;
   pageDuration?: number;
@@ -131,11 +132,18 @@ class Flipboard {
 - `false` disables it
 - a CSS `box-shadow` string overrides it, for example `0 12px 24px rgba(0, 0, 0, 0.18)`
 
+`tileShadow` controls the per-tile shadow:
+
+- `true` keeps the package default
+- `false` disables it
+- a CSS `box-shadow` string overrides it
+
 If you want to override the shadow from your own page CSS, set `--fb-board-shadow` on the board container or a parent wrapper:
 
 ```css
 .hero-board-wrap {
   --fb-board-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  --fb-tile-shadow: none;
 }
 ```
 
@@ -253,6 +261,7 @@ Import `@c-hinck10/splitflap-js/styles.css`, then override the board variables o
   --fb-letter-spacing: 0.03em;
   --fb-tile-aspect: 1 / 1;
   --fb-board-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+  --fb-tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
 }
 ```
 
@@ -266,3 +275,4 @@ Useful visual-tuning variables:
 - `--fb-radius`
 - `--fb-gap`
 - `--fb-board-shadow`
+- `--fb-tile-shadow`
