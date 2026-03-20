@@ -1,0 +1,70 @@
+{
+  "name": "@c-hinck10/splitflap-js",
+  "version": "0.1.0",
+  "description": "A lightweight split-flap display for the web.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c-hinck10/splitflap-js.git"
+  },
+  "homepage": "https://github.com/c-hinck10/splitflap-js#readme",
+  "bugs": {
+    "url": "https://github.com/c-hinck10/splitflap-js/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "./dist/styles.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "require": "./dist/react.cjs"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "vite demo",
+    "build": "tsup",
+    "check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "split-flap",
+    "flipboard",
+    "react",
+    "typescript",
+    "animation"
+  ],
+  "author": "Carson Hinckley",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "jsdom": "^26.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.4"
+  }
+}

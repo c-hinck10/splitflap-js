@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flipboard Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Fraunces:opsz,wght@9..144,600&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" src="./main.ts"></script>
+  </head>
+  <body>
+    <main class="demo-shell">
+      <section class="demo-copy">
+        <p class="demo-kicker">Split-flap display</p>
+        <h1>Visual tuning playground for the package scaffold.</h1>
+        <p class="demo-intro">
+          Adjust messages, trigger mode, and timing, then watch the DOM-driven
+          board update without any per-tile framework state.
+        </p>
+      </section>
+
+      <section class="demo-stage">
+        <div class="demo-panel">
+          <div class="demo-label-row">
+            <span>Live board</span>
+            <span id="demo-status">Ready</span>
+          </div>
+          <div id="board" class="demo-board-host"></div>
+        </div>
+
+        <form class="demo-controls" id="controls">
+          <label>
+            Preset
+            <select id="preset" name="preset">
+              <option value="custom" selected>Custom playlist</option>
+              <option value="kids">Kids office</option>
+              <option value="event">Event board</option>
+              <option value="menu">Cafe menu</option>
+            </select>
+          </label>
+
+          <label>
+            Message playlist
+            <textarea id="messages" name="messages" rows="7">TRACK YOUR MEDIA
+
+NOW PLAYING
+
+WELCOME TO THE HILTON BEAVER CREEK, WE APPRECIATE YOUR BUSINESS, CHECK THE FRONT DESK FOR EVENTS</textarea>
+            <span class="demo-help">
+              Separate messages with a blank line. Long messages will paginate
+              into multiple board pages automatically.
+            </span>
+          </label>
+
+          <div class="demo-grid">
+            <label>
+              Size
+              <select id="size" name="size">
+                <option value="3x15" selected>3x15</option>
+                <option value="6x22">6x22</option>
+              </select>
+            </label>
+
+            <label>
+              Trigger
+              <select id="trigger" name="trigger">
+                <option value="load">load</option>
+                <option value="visible">visible</option>
+                <option value="manual" selected>manual</option>
+              </select>
+            </label>
+
+            <label>
+              Flip start
+              <select id="staggerMode" name="staggerMode">
+                <option value="simultaneous" selected>simultaneous</option>
+                <option value="row">row</option>
+                <option value="sequence">sequence</option>
+              </select>
+            </label>
+
+            <label>
+              Stagger
+              <input
+                id="stagger"
+                name="stagger"
+                type="range"
+                min="0"
+                max="120"
+                step="5"
+                value="35"
+              />
+            </label>
+
+            <label>
+              Flip duration
+              <input
+                id="flipDuration"
+                name="flipDuration"
+                type="range"
+                min="60"
+                max="240"
+                step="10"
+                value="120"
+              />
+            </label>
+
+            <label>
+              Page duration
+              <input
+                id="pageDuration"
+                name="pageDuration"
+                type="range"
+                min="1000"
+                max="7000"
+                step="250"
+                value="3000"
+              />
+            </label>
+          </div>
+
+          <label class="demo-checkbox">
+            <input id="autoplay" name="autoplay" type="checkbox" checked />
+            Autoplay pages
+          </label>
+
+          <div class="demo-actions">
+            <button type="button" id="apply">Apply messages</button>
+            <button type="button" id="play">Play current</button>
+            <button type="button" id="next">Next</button>
+            <button type="button" id="reset">Reset</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,185 @@
+:root {
+  color-scheme: dark;
+  font-family:
+    "IBM Plex Mono",
+    ui-monospace,
+    monospace;
+  background:
+    radial-gradient(circle at top, rgba(243, 236, 216, 0.1), transparent 30%),
+    linear-gradient(180deg, #13110f 0%, #090909 100%);
+  color: #f6f0df;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.demo-shell {
+  width: min(1160px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 64px;
+}
+
+.demo-copy {
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+.demo-kicker {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: #d3b77a;
+}
+
+.demo-copy h1 {
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-size: clamp(2.6rem, 7vw, 5.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.demo-intro {
+  margin: 18px 0 0;
+  max-width: 50ch;
+  color: rgba(246, 240, 223, 0.78);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.demo-stage {
+  display: grid;
+  gap: 20px;
+}
+
+.demo-panel,
+.demo-controls {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 28%),
+    rgba(11, 11, 11, 0.86);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.demo-label-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  color: rgba(246, 240, 223, 0.68);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.demo-board-host {
+  --fb-bg: #15130f;
+  --fb-tile-bg: #201c16;
+  --fb-text: #f6f0df;
+  --fb-gap: 10px;
+  --fb-radius: 10px;
+  --fb-font-size: clamp(22px, 2.7vw, 34px);
+}
+
+.demo-controls {
+  display: grid;
+  gap: 16px;
+}
+
+.demo-controls label {
+  display: grid;
+  gap: 8px;
+  color: rgba(246, 240, 223, 0.8);
+  font-size: 0.88rem;
+}
+
+.demo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.demo-checkbox input {
+  width: 18px;
+  height: 18px;
+}
+
+.demo-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.demo-controls input,
+.demo-controls textarea,
+.demo-controls select,
+.demo-controls button {
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+}
+
+.demo-controls input,
+.demo-controls textarea,
+.demo-controls select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6f0df;
+}
+
+.demo-controls textarea {
+  min-height: 160px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.demo-controls input[type="range"] {
+  padding: 8px 0;
+}
+
+.demo-help {
+  color: rgba(246, 240, 223, 0.58);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.demo-actions button {
+  padding: 12px 16px;
+  background: #d3b77a;
+  color: #17130d;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.demo-actions button:hover {
+  background: #e4c98f;
+}
+
+@media (max-width: 720px) {
+  .demo-shell {
+    width: min(100% - 20px, 1160px);
+    padding-top: 28px;
+  }
+
+  .demo-panel,
+  .demo-controls {
+    padding: 14px;
+    border-radius: 18px;
+  }
+}
