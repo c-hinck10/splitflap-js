@@ -191,4 +191,65 @@ describe('Flipboard', () => {
 
     board.destroy();
   });
+
+  it('animates on first visibility for structured pages', async () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    const animateSpy = vi
+      .spyOn(Tile.prototype, 'animateTo')
+      .mockResolvedValue(undefined);
+
+    class MockIntersectionObserver {
+      constructor(
+        private readonly callback: IntersectionObserverCallback
+      ) {}
+
+      observe = observe.mockImplementation((element: Element) => {
+        this.callback(
+          [{ isIntersecting: true, target: element } as IntersectionObserverEntry],
+          this as unknown as IntersectionObserver
+        );
+      });
+
+      disconnect = disconnect;
+    }
+
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+
+    const board = new Flipboard(container, {
+      rows: 3,
+      cols: 15,
+      trigger: 'visible',
+      pages: [
+        {
+          theme: 'playful',
+          rows: [
+            {
+              kind: 'spacer',
+              leadingDecor: ['purple', 'blue'],
+              trailingDecor: ['blue', 'purple']
+            },
+            { text: 'WELCOME', align: 'center' },
+            {
+              kind: 'spacer',
+              leadingDecor: ['purple', 'blue'],
+              trailingDecor: ['blue', 'purple']
+            }
+          ]
+        }
+      ]
+    });
+
+    await Promise.resolve();
+
+    expect(observe).toHaveBeenCalled();
+    expect(animateSpy).toHaveBeenCalled();
+
+    board.destroy();
+    animateSpy.mockRestore();
+    vi.unstubAllGlobals();
+  });
 });
