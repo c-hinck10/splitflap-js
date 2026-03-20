@@ -14,7 +14,11 @@
   --fb-purple: #9b5cff;
   --fb-gap: 8px;
   --fb-radius: 8px;
+  --fb-tile-aspect: 1 / 1.12;
+  --fb-font-family: "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
   --fb-font-size: 28px;
+  --fb-font-weight: 600;
+  --fb-letter-spacing: 0.06em;
   --fb-line-color: rgba(255, 255, 255, 0.08);
   --fb-flip-duration: 120ms;
   display: grid;
@@ -49,7 +53,7 @@
   --fb-cell-bg: var(--fb-tile-bg);
   --fb-cell-text: var(--fb-text);
   position: relative;
-  aspect-ratio: 1 / 1.12;
+  aspect-ratio: var(--fb-tile-aspect);
   min-width: 0;
   overflow: hidden;
   border-radius: var(--fb-radius);
@@ -61,15 +65,11 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.5),
     0 8px 18px rgba(0, 0, 0, 0.25);
   color: var(--fb-cell-text);
-  font-family:
-    "IBM Plex Mono",
-    "SFMono-Regular",
-    ui-monospace,
-    monospace;
+  font-family: var(--fb-font-family);
   font-size: var(--fb-font-size);
-  font-weight: 600;
+  font-weight: var(--fb-font-weight);
   line-height: 1;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--fb-letter-spacing);
   text-transform: uppercase;
 }
 

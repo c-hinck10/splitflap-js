@@ -180,7 +180,7 @@ That advanced layer is what supports:
 
 ## Styling
 
-Import `@carson/flipboard/styles.css`, then override the board variables on the container or a parent element:
+Import `@c-hinck10/splitflap-js/styles.css`, then override the board variables on the container or a parent element:
 
 ```css
 .hero-board {
@@ -190,5 +190,18 @@ Import `@carson/flipboard/styles.css`, then override the board variables on the 
   --fb-gap: 8px;
   --fb-radius: 8px;
   --fb-font-size: 28px;
+  --fb-font-weight: 500;
+  --fb-letter-spacing: 0.03em;
+  --fb-tile-aspect: 1 / 1;
 }
 ```
+
+Useful visual-tuning variables:
+
+- `--fb-font-family`
+- `--fb-font-size`
+- `--fb-font-weight`
+- `--fb-letter-spacing`
+- `--fb-tile-aspect`
+- `--fb-radius`
+- `--fb-gap`
