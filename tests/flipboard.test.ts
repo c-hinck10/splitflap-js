@@ -86,6 +86,36 @@ describe('Flipboard', () => {
     board.destroy();
   });
 
+  it('animates the first play call after prerendering a structured page', async () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const animateSpy = vi
+      .spyOn(Tile.prototype, 'animateTo')
+      .mockResolvedValue(undefined);
+
+    const board = new Flipboard(container, {
+      rows: 3,
+      cols: 15,
+      trigger: 'manual',
+      pages: [
+        {
+          theme: 'playful',
+          rows: [{ text: 'WELCOME', align: 'center' }]
+        }
+      ]
+    });
+
+    animateSpy.mockClear();
+    board.play();
+    await Promise.resolve();
+
+    expect(animateSpy).toHaveBeenCalled();
+
+    animateSpy.mockRestore();
+    board.destroy();
+  });
+
   it('keeps the default charset when charset is explicitly undefined', () => {
     const container = document.createElement('div');
     document.body.append(container);

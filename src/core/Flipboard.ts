@@ -82,6 +82,7 @@ export class Flipboard {
   private disconnectVisibility?: () => void;
   private currentIndex: number;
   private currentSignature = '';
+  private hasAnimatedCurrentState = false;
   private destroyed = false;
   private isPlaying = false;
   private queuedPlayback?: { page: MessagePage; index: number };
@@ -174,6 +175,7 @@ export class Flipboard {
     this.isPlaying = false;
     this.queuedPlayback = undefined;
     this.currentSignature = '';
+    this.hasAnimatedCurrentState = false;
     this.clearAutoplayTimer();
     this.currentIndex = this.clampIndex(this.options.startIndex);
 
@@ -242,10 +244,11 @@ export class Flipboard {
         this.tiles[index]?.setImmediate(normalized[index] ?? emptyCell());
       }
       this.currentSignature = signature;
+      this.hasAnimatedCurrentState = false;
       return;
     }
 
-    if (signature === this.currentSignature) {
+    if (signature === this.currentSignature && this.hasAnimatedCurrentState) {
       return;
     }
 
@@ -272,6 +275,7 @@ export class Flipboard {
 
     this.isPlaying = false;
     this.currentSignature = signature;
+    this.hasAnimatedCurrentState = true;
     this.options.onComplete?.(message, this.currentIndex);
     this.scheduleAutoplay();
 
