@@ -85,4 +85,21 @@ describe('Flipboard', () => {
 
     board.destroy();
   });
+
+  it('keeps the default charset when charset is explicitly undefined', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    expect(() => {
+      const board = new Flipboard(container, {
+        rows: 2,
+        cols: 4,
+        trigger: 'manual',
+        charset: undefined,
+        messages: ['TEST']
+      });
+
+      board.destroy();
+    }).not.toThrow();
+  });
 });

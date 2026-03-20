@@ -89,8 +89,9 @@ export class Flipboard {
 
   constructor(container: HTMLElement, options: FlipboardOptions = {}) {
     this.container = container;
-    const resolvedSize = resolveBoardSize(options);
-    this.options = { ...DEFAULT_OPTIONS, ...resolvedSize, ...options };
+    const sanitizedOptions = removeUndefined(options);
+    const resolvedSize = resolveBoardSize(sanitizedOptions);
+    this.options = { ...DEFAULT_OPTIONS, ...resolvedSize, ...sanitizedOptions };
     this.charsetList = [...new Set(this.options.charset.split(''))];
     this.playlist = this.resolvePlaylist();
     this.currentIndex = this.clampIndex(this.options.startIndex);
@@ -418,4 +419,10 @@ function emptyCell(): FlipboardCell {
 
 function serializeCells(cells: FlipboardCell[], theme: FlipboardTheme): string {
   return `${theme}:${cells.map((cell) => `${cell.char ?? ' '}:${cell.tone ?? 'default'}`).join('|')}`;
+}
+
+function removeUndefined<T extends Record<string, unknown>>(value: T): T {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entry]) => entry !== undefined)
+  ) as T;
 }

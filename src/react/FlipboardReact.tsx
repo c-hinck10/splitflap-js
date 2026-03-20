@@ -72,7 +72,7 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
         return undefined;
       }
 
-      const board = new FlipboardCore(containerRef.current, {
+      const board = new FlipboardCore(containerRef.current, removeUndefined({
         size,
         rows,
         cols,
@@ -92,7 +92,7 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
         pages,
         startIndex,
         onComplete
-      });
+      }));
 
       boardRef.current = board;
 
@@ -135,3 +135,9 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
     return <div ref={containerRef} className={className} />;
   }
 );
+
+function removeUndefined<T extends Record<string, unknown>>(value: T): T {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entry]) => entry !== undefined)
+  ) as T;
+}
