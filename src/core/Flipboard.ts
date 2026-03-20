@@ -113,7 +113,7 @@ export class Flipboard {
     this.container.append(this.board, this.srText);
 
     this.createTiles();
-    this.applyPage(this.playlist[this.currentIndex] ?? emptyPage(), false);
+    this.renderBlankState();
     this.installTrigger();
   }
 
@@ -178,13 +178,7 @@ export class Flipboard {
     this.hasAnimatedCurrentState = false;
     this.clearAutoplayTimer();
     this.currentIndex = this.clampIndex(this.options.startIndex);
-
-    for (let index = 0; index < this.tiles.length; index += 1) {
-      this.tiles[index]?.setImmediate(emptyCell());
-    }
-
-    this.updateAccessibleText('');
-    this.board.setAttribute('aria-label', '');
+    this.renderBlankState();
   }
 
   destroy(): void {
@@ -208,6 +202,16 @@ export class Flipboard {
       this.tiles.push(tile);
       this.board.append(tile.element);
     }
+  }
+
+  private renderBlankState(): void {
+    for (let index = 0; index < this.tiles.length; index += 1) {
+      this.tiles[index]?.setImmediate(emptyCell());
+    }
+
+    this.updateAccessibleText('');
+    this.board.setAttribute('aria-label', '');
+    this.board.dataset.theme = this.options.theme;
   }
 
   private installTrigger(): void {

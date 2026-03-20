@@ -116,6 +116,31 @@ describe('Flipboard', () => {
     board.destroy();
   });
 
+  it('starts from blank tiles before the first play for structured pages', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const board = new Flipboard(container, {
+      rows: 3,
+      cols: 15,
+      trigger: 'manual',
+      pages: [
+        {
+          theme: 'playful',
+          rows: [{ text: 'WELCOME', align: 'center' }]
+        }
+      ]
+    });
+
+    const tileText = Array.from(container.querySelectorAll('.fb-glyph'))
+      .map((glyph) => glyph.textContent)
+      .join('');
+
+    expect(tileText.trim()).toBe('');
+
+    board.destroy();
+  });
+
   it('keeps the default charset when charset is explicitly undefined', () => {
     const container = document.createElement('div');
     document.body.append(container);
