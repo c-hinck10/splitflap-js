@@ -157,4 +157,38 @@ describe('Flipboard', () => {
       board.destroy();
     }).not.toThrow();
   });
+
+  it('animates decorative tiles when only the tone changes', async () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 4,
+      trigger: 'manual',
+      pages: [
+        {
+          theme: 'playful',
+          rows: [
+            {
+              kind: 'spacer',
+              leadingDecor: ['purple', 'blue'],
+              trailingDecor: ['blue', 'purple']
+            }
+          ]
+        }
+      ]
+    });
+
+    board.play();
+    await Promise.resolve();
+
+    const tones = Array.from(container.querySelectorAll('.fb-tile')).map((tile) =>
+      tile.getAttribute('data-tone')
+    );
+
+    expect(tones).toEqual(['purple', 'blue', 'blue', 'purple']);
+
+    board.destroy();
+  });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@c-hinck10/splitflap-js",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A lightweight split-flap display for the web.",
   "repository": {
     "type": "git",

@@ -26,6 +26,7 @@ export class Tile {
   private readonly flapFront: HTMLDivElement;
   private readonly flapBack: HTMLDivElement;
   private currentChar: string;
+  private currentTone: CellTone = 'default';
   private timeouts: number[] = [];
 
   constructor(char = ' ') {
@@ -45,7 +46,8 @@ export class Tile {
   setImmediate(cell: FlipboardCell): void {
     this.clearTimers();
     this.currentChar = cell.char ?? ' ';
-    this.applyTone(cell.tone);
+    this.currentTone = cell.tone ?? 'default';
+    this.applyTone(this.currentTone);
     this.syncFaces(this.currentChar, this.currentChar);
     this.element.classList.remove('is-flipping');
   }
@@ -57,15 +59,16 @@ export class Tile {
     flipDuration: number
   ): Promise<void> {
     const target = targetCell.char ?? ' ';
+    const targetTone = targetCell.tone ?? 'default';
+    const toneChanged = targetTone !== this.currentTone;
 
-    if (target === this.currentChar) {
-      this.applyTone(targetCell.tone);
+    if (target === this.currentChar && !toneChanged) {
       return Promise.resolve();
     }
 
     this.clearTimers();
-    this.applyTone(targetCell.tone);
-    const sequence = this.buildSequence(target, charset);
+    this.applyTone(targetTone);
+    const sequence = this.buildSequence(target, charset, toneChanged);
 
     return new Promise((resolve) => {
       const startTimeout = window.setTimeout(() => {
@@ -139,6 +142,7 @@ export class Tile {
 
     const endTimeout = window.setTimeout(() => {
       this.currentChar = nextChar;
+      this.currentTone = this.element.dataset.tone as CellTone;
       this.syncFaces(nextChar, nextChar);
       this.element.classList.remove('is-flipping');
     }, flipDuration);
@@ -146,7 +150,11 @@ export class Tile {
     this.timeouts.push(midpointTimeout, endTimeout);
   }
 
-  private buildSequence(target: string, charset: string[]): string[] {
+  private buildSequence(
+    target: string,
+    charset: string[],
+    forceSingleFlip = false
+  ): string[] {
     const currentIndex = charset.indexOf(this.currentChar);
     const targetIndex = charset.indexOf(target);
 
@@ -160,6 +168,10 @@ export class Tile {
     while (index !== targetIndex) {
       index = (index + 1) % charset.length;
       sequence.push(charset[index] ?? target);
+    }
+
+    if (sequence.length === 0 && forceSingleFlip) {
+      return [target];
     }
 
     return sequence;
