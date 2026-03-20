@@ -1,10 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Flipboard } from '../src/core/Flipboard';
 import { Tile } from '../src/core/Tile';
 
 describe('Flipboard', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it('uses simultaneous flip starts by default', async () => {
@@ -159,6 +164,8 @@ describe('Flipboard', () => {
   });
 
   it('animates decorative tiles when only the tone changes', async () => {
+    vi.useFakeTimers();
+
     const container = document.createElement('div');
     document.body.append(container);
 
@@ -181,7 +188,7 @@ describe('Flipboard', () => {
     });
 
     board.play();
-    await Promise.resolve();
+    await vi.runAllTimersAsync();
 
     const tones = Array.from(container.querySelectorAll('.fb-tile')).map((tile) =>
       tile.getAttribute('data-tone')
@@ -198,9 +205,7 @@ describe('Flipboard', () => {
 
     const observe = vi.fn();
     const disconnect = vi.fn();
-    const animateSpy = vi
-      .spyOn(Tile.prototype, 'animateTo')
-      .mockResolvedValue(undefined);
+    const animateSpy = vi.spyOn(Tile.prototype, 'animateTo');
 
     class MockIntersectionObserver {
       constructor(
@@ -221,7 +226,7 @@ describe('Flipboard', () => {
 
     const board = new Flipboard(container, {
       rows: 3,
-      cols: 15,
+      cols: 22,
       trigger: 'visible',
       pages: [
         {
@@ -229,14 +234,14 @@ describe('Flipboard', () => {
           rows: [
             {
               kind: 'spacer',
-              leadingDecor: ['purple', 'blue'],
-              trailingDecor: ['blue', 'purple']
+              leadingDecor: ['purple', 'blue', 'green', 'yellow'],
+              trailingDecor: ['yellow', 'green', 'blue', 'purple']
             },
             { text: 'WELCOME', align: 'center' },
             {
               kind: 'spacer',
-              leadingDecor: ['purple', 'blue'],
-              trailingDecor: ['blue', 'purple']
+              leadingDecor: ['purple', 'blue', 'green', 'yellow'],
+              trailingDecor: ['yellow', 'green', 'blue', 'purple']
             }
           ]
         }
@@ -247,9 +252,35 @@ describe('Flipboard', () => {
 
     expect(observe).toHaveBeenCalled();
     expect(animateSpy).toHaveBeenCalled();
+    expect(
+      animateSpy.mock.calls.some(
+        ([cell]) => cell.char === ' ' && cell.tone && cell.tone !== 'default'
+      )
+    ).toBe(true);
 
     board.destroy();
     animateSpy.mockRestore();
-    vi.unstubAllGlobals();
+  });
+
+  it('applies tone changes at flip time for blank decor tiles', async () => {
+    vi.useFakeTimers();
+
+    const tile = new Tile(' ');
+    tile.setImmediate({ char: ' ', tone: 'default' });
+
+    const animation = tile.animateTo(
+      { char: ' ', tone: 'purple' },
+      [' '],
+      0,
+      100
+    );
+
+    expect(tile.element.getAttribute('data-tone')).toBe('default');
+
+    await vi.advanceTimersByTimeAsync(50);
+    expect(tile.element.getAttribute('data-tone')).toBe('purple');
+
+    await vi.advanceTimersByTimeAsync(100);
+    await animation;
   });
 });

@@ -67,7 +67,6 @@ export class Tile {
     }
 
     this.clearTimers();
-    this.applyTone(targetTone);
     const sequence = this.buildSequence(target, charset, toneChanged);
 
     return new Promise((resolve) => {
@@ -83,7 +82,12 @@ export class Tile {
             return;
           }
 
-          this.playStep(nextChar, flipDuration);
+          const isFinalStep = stepIndex === sequence.length - 1;
+          this.playStep(
+            nextChar,
+            flipDuration,
+            isFinalStep && toneChanged ? targetTone : undefined
+          );
           stepIndex += 1;
 
           const continuation = window.setTimeout(runStep, flipDuration);
@@ -123,7 +127,11 @@ export class Tile {
     this.setFaceText(this.flapBack, next);
   }
 
-  private playStep(nextChar: string, flipDuration: number): void {
+  private playStep(
+    nextChar: string,
+    flipDuration: number,
+    nextTone?: CellTone
+  ): void {
     const midpoint = Math.max(16, Math.floor(flipDuration / 2));
     const fromChar = this.currentChar;
 
@@ -136,13 +144,17 @@ export class Tile {
     this.element.classList.add('is-flipping');
 
     const midpointTimeout = window.setTimeout(() => {
+      if (nextTone) {
+        this.currentTone = nextTone;
+        this.applyTone(nextTone);
+      }
       this.setFaceText(this.top, nextChar);
       this.setFaceText(this.bottom, nextChar);
     }, midpoint);
 
     const endTimeout = window.setTimeout(() => {
       this.currentChar = nextChar;
-      this.currentTone = this.element.dataset.tone as CellTone;
+      this.currentTone = nextTone ?? this.currentTone;
       this.syncFaces(nextChar, nextChar);
       this.element.classList.remove('is-flipping');
     }, flipDuration);
