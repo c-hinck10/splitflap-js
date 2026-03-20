@@ -10,6 +10,7 @@ It is built as a framework-agnostic DOM core with a tiny React wrapper, so the p
 - Word-aware row layout that avoids splitting words when possible
 - Long-message pagination into multiple board pages
 - Advanced `pages` API for row offsets, columns, decorators, and tones
+- Face-wheel model for authentic flap progression with optional custom ordering
 - DOM-driven animation core
 - `load`, `visible`, and `manual` trigger modes
 - Optional autoplay page rotation
@@ -96,6 +97,8 @@ type FlipboardOptions = {
   staggerMode?: 'simultaneous' | 'row' | 'sequence';
   flipDuration?: number;
   charset?: string;
+  faces?: FlipboardFace[];
+  shadow?: boolean | string;
   loop?: boolean;
   autoplay?: boolean;
   pageDuration?: number;
@@ -121,6 +124,62 @@ class Flipboard {
 `preserveWords` is enabled by default, so messages are wrapped per row when possible instead of being sliced through the middle of a word. For classic board composition, `align: 'center'` is also the default.
 
 `paginate` is also enabled by default, so one long message can automatically become multiple board pages. Pair that with `autoplay: true` and `pageDuration` to rotate through those pages on a timer.
+
+`shadow` controls the outer board drop shadow:
+
+- `true` keeps the package default
+- `false` disables it
+- a CSS `box-shadow` string overrides it, for example `0 12px 24px rgba(0, 0, 0, 0.18)`
+
+If you want to override the shadow from your own page CSS, set `--fb-board-shadow` on the board container or a parent wrapper:
+
+```css
+.hero-board-wrap {
+  --fb-board-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+```
+
+## Face Wheel
+
+The simple API still works with `charset`, but the animation model now treats a flap face as a full visual state, not just a character.
+
+That means a face can include:
+
+- `char`
+- `tone`
+- optional `id`
+- optional `label`
+
+For most boards, you can keep using `charset` and let the package build a default face wheel for you. That default wheel preserves normal character flips and includes blank-tone decor faces for colored spacer rows.
+
+If you want explicit control over flap ordering, pass `faces`:
+
+```ts
+import { Flipboard, createDefaultFaces } from '@c-hinck10/splitflap-js';
+
+const faces = [
+  ...createDefaultFaces(' ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+  { id: 'rainbow-start', char: '*', tone: 'accent' },
+  { id: 'purple-blank', char: ' ', tone: 'purple' }
+];
+
+const board = new Flipboard(container, {
+  size: '6x22',
+  faces,
+  pages: [
+    {
+      rows: [
+        {
+          kind: 'spacer',
+          leadingDecor: [{ char: ' ', tone: 'purple' }]
+        }
+      ]
+    }
+  ]
+});
+```
+
+Order in `faces` defines rotation order. That gives you a path to authentic boards where decorative symbols, letters, blanks, and tone variants all exist as real flap faces.
 
 ## Size Presets
 
@@ -193,6 +252,7 @@ Import `@c-hinck10/splitflap-js/styles.css`, then override the board variables o
   --fb-font-weight: 500;
   --fb-letter-spacing: 0.03em;
   --fb-tile-aspect: 1 / 1;
+  --fb-board-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
 }
 ```
 
@@ -205,3 +265,4 @@ Useful visual-tuning variables:
 - `--fb-tile-aspect`
 - `--fb-radius`
 - `--fb-gap`
+- `--fb-board-shadow`

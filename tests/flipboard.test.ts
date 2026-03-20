@@ -283,4 +283,89 @@ describe('Flipboard', () => {
     await vi.advanceTimersByTimeAsync(100);
     await animation;
   });
+
+  it('allows the board drop shadow to be disabled', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      shadow: false
+    });
+
+    const renderedBoard = container.querySelector('.fb-board') as HTMLDivElement;
+    expect(renderedBoard.style.getPropertyValue('--fb-board-shadow')).toBe(
+      '0 0 0 rgba(0, 0, 0, 0)'
+    );
+
+    board.destroy();
+  });
+
+  it('allows the board drop shadow to be customized', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      shadow: '0 12px 24px rgba(0, 0, 0, 0.18)'
+    });
+
+    const renderedBoard = container.querySelector('.fb-board') as HTMLDivElement;
+    expect(renderedBoard.style.getPropertyValue('--fb-board-shadow')).toBe(
+      '0 12px 24px rgba(0, 0, 0, 0.18)'
+    );
+
+    board.destroy();
+  });
+
+  it('continues from the last visible page state instead of resetting between pages', async () => {
+    vi.useFakeTimers();
+
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const setImmediateSpy = vi.spyOn(Tile.prototype, 'setImmediate');
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      autoplay: false,
+      faces: [
+        { char: ' ', tone: 'default' },
+        { char: 'A', tone: 'default' },
+        { char: 'B', tone: 'default' }
+      ],
+      pages: [
+        {
+          rows: [{ text: 'A' }]
+        },
+        {
+          rows: [{ text: 'B' }]
+        }
+      ]
+    });
+
+    // Initial blank render is allowed during construction.
+    setImmediateSpy.mockClear();
+
+    board.play(0);
+    await vi.runAllTimersAsync();
+
+    expect(container.querySelector('.fb-glyph')?.textContent).toBe('A');
+    expect(setImmediateSpy).not.toHaveBeenCalled();
+
+    board.next();
+    await vi.runAllTimersAsync();
+
+    expect(container.querySelector('.fb-glyph')?.textContent).toBe('B');
+    expect(setImmediateSpy).not.toHaveBeenCalled();
+
+    setImmediateSpy.mockRestore();
+    board.destroy();
+  });
 });

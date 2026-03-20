@@ -16,6 +16,13 @@ export type FlipboardCell = {
   tone?: CellTone;
 };
 
+export type FlipboardFace = {
+  id?: string;
+  char?: string;
+  tone?: CellTone;
+  label?: string;
+};
+
 export type FlipboardDecor =
   | string
   | CellTone[]

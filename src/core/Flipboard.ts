@@ -1,9 +1,16 @@
 import {
+  createDefaultFaces,
+  resolveFace,
+  resolveFaceWheel,
+  type ResolvedFlipboardFace
+} from './faces';
+import {
   layoutMessagePages,
   layoutStructuredPages,
   normalizeMessage,
   type CellTone,
   type FlipboardCell,
+  type FlipboardFace,
   type FlipboardPage,
   type FlipboardTheme,
   type MessageAlign,
@@ -35,6 +42,8 @@ export type FlipboardOptions = {
   staggerMode?: StaggerMode;
   flipDuration?: number;
   charset?: string;
+  faces?: FlipboardFace[];
+  shadow?: boolean | string;
   loop?: boolean;
   autoplay?: boolean;
   pageDuration?: number;
@@ -61,6 +70,8 @@ export const DEFAULT_OPTIONS: Required<Omit<FlipboardOptions, 'onComplete'>> = {
   staggerMode: 'simultaneous',
   flipDuration: 120,
   charset: DEFAULT_CHARSET,
+  faces: [],
+  shadow: true,
   loop: false,
   autoplay: false,
   pageDuration: 3000,
@@ -74,7 +85,7 @@ export class Flipboard {
   private readonly container: HTMLElement;
   private readonly options: Required<Omit<FlipboardOptions, 'onComplete'>> &
     Pick<FlipboardOptions, 'onComplete'>;
-  private readonly charsetList: string[];
+  private readonly faceWheel: ResolvedFlipboardFace[];
   private readonly board: HTMLDivElement;
   private readonly srText: HTMLSpanElement;
   private readonly tiles: Tile[] = [];
@@ -93,7 +104,7 @@ export class Flipboard {
     const sanitizedOptions = removeUndefined(options);
     const resolvedSize = resolveBoardSize(sanitizedOptions);
     this.options = { ...DEFAULT_OPTIONS, ...resolvedSize, ...sanitizedOptions };
-    this.charsetList = [...new Set(this.options.charset.split(''))];
+    this.faceWheel = resolveFaceWheel(this.options.faces, this.options.charset);
     this.playlist = this.resolvePlaylist();
     this.currentIndex = this.clampIndex(this.options.startIndex);
 
@@ -105,6 +116,7 @@ export class Flipboard {
       '--fb-flip-duration',
       `${this.options.flipDuration}ms`
     );
+    applyBoardShadow(this.board, this.options.shadow);
 
     this.srText = document.createElement('span');
     this.srText.className = 'fb-sr-only';
@@ -236,7 +248,8 @@ export class Flipboard {
     }
 
     const normalized = this.resolveCells(page);
-    const signature = serializeCells(normalized, page.theme ?? this.options.theme);
+    const resolvedFaces = normalized.map((cell) => resolveFace(cell, this.faceWheel));
+    const signature = serializeFaces(resolvedFaces, page.theme ?? this.options.theme);
     const message = page.text;
 
     this.board.setAttribute('aria-label', message);
@@ -245,7 +258,7 @@ export class Flipboard {
 
     if (!animate) {
       for (let index = 0; index < normalized.length; index += 1) {
-        this.tiles[index]?.setImmediate(normalized[index] ?? emptyCell());
+        this.tiles[index]?.setImmediate(resolvedFaces[index] ?? emptyFace());
       }
       this.currentSignature = signature;
       this.hasAnimatedCurrentState = false;
@@ -267,10 +280,10 @@ export class Flipboard {
     this.isPlaying = true;
 
     await Promise.all(
-      normalized.map((cell, index) =>
+      resolvedFaces.map((face, index) =>
         this.tiles[index]?.animateTo(
-          cell,
-          this.charsetList,
+          face,
+          this.faceWheel,
           this.getTileDelay(index),
           this.options.flipDuration
         ) ?? Promise.resolve()
@@ -418,6 +431,23 @@ function emptyPage(): MessagePage {
   };
 }
 
+function applyBoardShadow(
+  board: HTMLDivElement,
+  shadow: boolean | string | undefined
+): void {
+  if (shadow === false) {
+    board.style.setProperty('--fb-board-shadow', '0 0 0 rgba(0, 0, 0, 0)');
+    return;
+  }
+
+  if (typeof shadow === 'string' && shadow.trim().length > 0) {
+    board.style.setProperty('--fb-board-shadow', shadow);
+    return;
+  }
+
+  board.style.removeProperty('--fb-board-shadow');
+}
+
 function emptyCell(): FlipboardCell {
   return {
     char: ' ',
@@ -425,8 +455,19 @@ function emptyCell(): FlipboardCell {
   };
 }
 
-function serializeCells(cells: FlipboardCell[], theme: FlipboardTheme): string {
-  return `${theme}:${cells.map((cell) => `${cell.char ?? ' '}:${cell.tone ?? 'default'}`).join('|')}`;
+function emptyFace(): ResolvedFlipboardFace {
+  return {
+    key: ' \u241fdefault',
+    char: ' ',
+    tone: 'default'
+  };
+}
+
+function serializeFaces(
+  faces: ResolvedFlipboardFace[],
+  theme: FlipboardTheme
+): string {
+  return `${theme}:${faces.map((face) => face.key).join('|')}`;
 }
 
 function removeUndefined<T extends Record<string, unknown>>(value: T): T {

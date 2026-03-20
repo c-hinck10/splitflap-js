@@ -3,16 +3,21 @@ export {
   DEFAULT_OPTIONS,
   FLIPBOARD_SIZES,
   Flipboard,
+  type StaggerMode,
   type FlipboardOptions,
   type FlipboardSize,
   type TriggerMode
 } from './core/Flipboard';
+export {
+  createDefaultFaces
+} from './core/faces';
 export {
   layoutStructuredPages,
   layoutMessagePages,
   normalizeMessage,
   type CellTone,
   type FlipboardCell,
+  type FlipboardFace,
   type FlipboardColumnsRow,
   type FlipboardDecor,
   type FlipboardPage,
