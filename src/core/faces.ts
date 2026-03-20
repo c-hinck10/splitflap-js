@@ -57,6 +57,27 @@ export function resolveFaceWheel(
   return resolved;
 }
 
+export function extendFaceWheel(
+  faceWheel: ResolvedFlipboardFace[],
+  faces: Array<FlipboardFace | FlipboardCell>
+): ResolvedFlipboardFace[] {
+  const extended = [...faceWheel];
+  const seen = new Set(extended.map((face) => face.key));
+
+  for (const face of faces) {
+    const normalized = normalizeFace(face);
+
+    if (seen.has(normalized.key)) {
+      continue;
+    }
+
+    seen.add(normalized.key);
+    extended.push(normalized);
+  }
+
+  return extended;
+}
+
 export function resolveFace(
   cell: FlipboardCell,
   faceWheel: ResolvedFlipboardFace[]

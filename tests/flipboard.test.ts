@@ -405,4 +405,45 @@ describe('Flipboard', () => {
     setImmediateSpy.mockRestore();
     board.destroy();
   });
+
+  it('adds encountered blank-tone faces to a custom wheel for forward traversal', async () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const animateSpy = vi
+      .spyOn(Tile.prototype, 'animateTo')
+      .mockResolvedValue(undefined);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      faces: [
+        { char: ' ', tone: 'default' },
+        { char: 'A', tone: 'default' },
+        { char: 'B', tone: 'default' }
+      ],
+      pages: [
+        {
+          rows: [
+            {
+              kind: 'spacer',
+              leadingDecor: [{ char: ' ', tone: 'purple' }]
+            }
+          ]
+        }
+      ]
+    });
+
+    board.play();
+    await Promise.resolve();
+
+    const [, faceWheel] = animateSpy.mock.calls[0] ?? [];
+    expect(faceWheel.map((face: { char: string; tone: string }) => `${face.char}:${face.tone}`)).toContain(
+      ' :purple'
+    );
+
+    animateSpy.mockRestore();
+    board.destroy();
+  });
 });

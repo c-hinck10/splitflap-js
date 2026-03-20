@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createDefaultFaces,
   createFaceSequence,
+  extendFaceWheel,
   normalizeFace,
   resolveFace,
   resolveFaceWheel
@@ -53,6 +54,30 @@ describe('face wheel helpers', () => {
     expect(sequence.map((face) => `${face.char}:${face.tone}`)).toEqual([
       '*:accent',
       'B:default'
+    ]);
+  });
+
+  it('extends the wheel with encountered faces so they can roll forward', () => {
+    const baseWheel = resolveFaceWheel(
+      [
+        { char: ' ', tone: 'default' },
+        { char: 'A', tone: 'default' },
+        { char: 'B', tone: 'default' }
+      ],
+      ' AB'
+    );
+
+    const wheel = extendFaceWheel(baseWheel, [{ char: ' ', tone: 'purple' }]);
+    const sequence = createFaceSequence(
+      normalizeFace({ char: ' ', tone: 'default' }),
+      normalizeFace({ char: ' ', tone: 'purple' }),
+      wheel
+    );
+
+    expect(sequence.map((face) => `${face.char}:${face.tone}`)).toEqual([
+      'A:default',
+      'B:default',
+      ' :purple'
     ]);
   });
 });

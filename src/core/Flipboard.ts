@@ -1,5 +1,6 @@
 import {
   createDefaultFaces,
+  extendFaceWheel,
   resolveFace,
   resolveFaceWheel,
   type ResolvedFlipboardFace
@@ -87,7 +88,7 @@ export class Flipboard {
   private readonly container: HTMLElement;
   private readonly options: Required<Omit<FlipboardOptions, 'onComplete'>> &
     Pick<FlipboardOptions, 'onComplete'>;
-  private readonly faceWheel: ResolvedFlipboardFace[];
+  private faceWheel: ResolvedFlipboardFace[] = [];
   private readonly board: HTMLDivElement;
   private readonly srText: HTMLSpanElement;
   private readonly tiles: Tile[] = [];
@@ -106,8 +107,8 @@ export class Flipboard {
     const sanitizedOptions = removeUndefined(options);
     const resolvedSize = resolveBoardSize(sanitizedOptions);
     this.options = { ...DEFAULT_OPTIONS, ...resolvedSize, ...sanitizedOptions };
-    this.faceWheel = resolveFaceWheel(this.options.faces, this.options.charset);
     this.playlist = this.resolvePlaylist();
+    this.refreshFaceWheel();
     this.currentIndex = this.clampIndex(this.options.startIndex);
 
     this.board = document.createElement('div');
@@ -136,6 +137,7 @@ export class Flipboard {
     this.options.messages = [message];
     this.options.pages = [];
     this.playlist = this.resolvePlaylist();
+    this.refreshFaceWheel();
     this.currentIndex = 0;
     this.clearAutoplayTimer();
     void this.applyPage(this.playlist[0] ?? emptyPage(), true);
@@ -145,6 +147,7 @@ export class Flipboard {
     this.options.messages = messages.length > 0 ? messages : [''];
     this.options.pages = [];
     this.playlist = this.resolvePlaylist();
+    this.refreshFaceWheel();
     this.currentIndex = this.clampIndex(this.currentIndex);
     this.clearAutoplayTimer();
     void this.applyPage(this.playlist[this.currentIndex] ?? emptyPage(), false);
@@ -153,6 +156,7 @@ export class Flipboard {
   setPages(pages: FlipboardPage[]): void {
     this.options.pages = pages;
     this.playlist = this.resolvePlaylist();
+    this.refreshFaceWheel();
     this.currentIndex = this.clampIndex(this.currentIndex);
     this.clearAutoplayTimer();
     void this.applyPage(this.playlist[this.currentIndex] ?? emptyPage(), false);
@@ -380,6 +384,12 @@ export class Flipboard {
       preserveWords: this.options.preserveWords,
       tone: this.options.tone
     });
+  }
+
+  private refreshFaceWheel(): void {
+    const baseWheel = resolveFaceWheel(this.options.faces, this.options.charset);
+    const encounteredFaces = this.playlist.flatMap((page) => this.resolveCells(page));
+    this.faceWheel = extendFaceWheel(baseWheel, encounteredFaces);
   }
 
   private getTileDelay(index: number): number {
