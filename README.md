@@ -147,6 +147,17 @@ If you want to override the shadow from your own page CSS, set `--fb-board-shado
 }
 ```
 
+For flatter or more custom boards, you can also override the packaged gloss and fill layers directly:
+
+```css
+.hero-board-wrap {
+  --fb-board-background: #f7f7f5;
+  --fb-tile-background: var(--fb-tile-bg);
+  --fb-tile-inset-shadow: none;
+  --fb-tile-drop-shadow: none;
+}
+```
+
 ## Face Wheel
 
 The simple API still works with `charset`, but the animation model now treats a flap face as a full visual state, not just a character.
@@ -262,6 +273,8 @@ Import `@c-hinck10/splitflap-js/styles.css`, then override the board variables o
   --fb-tile-aspect: 1 / 1;
   --fb-board-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
   --fb-tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  --fb-board-background: #111;
+  --fb-tile-background: var(--fb-tile-bg);
 }
 ```
 
@@ -276,3 +289,7 @@ Useful visual-tuning variables:
 - `--fb-gap`
 - `--fb-board-shadow`
 - `--fb-tile-shadow`
+- `--fb-tile-inset-shadow`
+- `--fb-tile-drop-shadow`
+- `--fb-board-background`
+- `--fb-tile-background`
