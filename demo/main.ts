@@ -22,6 +22,15 @@ const triggerInput = document.getElementById('trigger') as HTMLSelectElement;
 const previewStyleInput = document.getElementById(
   'previewStyle'
 ) as HTMLSelectElement;
+const responsiveInput = document.getElementById(
+  'responsive'
+) as HTMLSelectElement;
+const performanceModeInput = document.getElementById(
+  'performanceMode'
+) as HTMLSelectElement;
+const flipDirectionInput = document.getElementById(
+  'flipDirection'
+) as HTMLSelectElement;
 const staggerModeInput = document.getElementById(
   'staggerMode'
 ) as HTMLSelectElement;
@@ -232,6 +241,9 @@ function createBoard(): Flipboard {
     align: 'center',
     preserveWords: true,
     trigger: triggerInput.value as TriggerMode,
+    responsive: responsiveInput.value === 'on',
+    performanceMode: performanceModeInput.value as 'auto' | 'off' | 'on',
+    flipDirection: flipDirectionInput.value as 'forward' | 'shortest',
     staggerMode: staggerModeInput.value as 'simultaneous' | 'row' | 'sequence',
     messages: isCustom ? createMessages() : [],
     pages: isCustom ? [] : pages,
@@ -333,6 +345,9 @@ presetInput.addEventListener('change', () => {
 
 previewStyleInput.addEventListener('change', rebuildBoard);
 triggerInput.addEventListener('change', rebuildBoard);
+responsiveInput.addEventListener('change', rebuildBoard);
+performanceModeInput.addEventListener('change', rebuildBoard);
+flipDirectionInput.addEventListener('change', rebuildBoard);
 sizeInput.addEventListener('change', rebuildBoard);
 staggerModeInput.addEventListener('change', rebuildBoard);
 staggerInput.addEventListener('input', rebuildBoard);

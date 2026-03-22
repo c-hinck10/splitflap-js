@@ -107,6 +107,11 @@ type FlipboardOptions = {
   messages?: string[];
   pages?: FlipboardPage[];
   startIndex?: number;
+  respectReducedMotion?: boolean;
+  pauseWhenHidden?: boolean;
+  responsive?: boolean;
+  performanceMode?: 'auto' | 'off' | 'on';
+  flipDirection?: 'forward' | 'shortest';
   onComplete?: (message: string, index: number) => void;
 };
 
@@ -125,6 +130,14 @@ class Flipboard {
 `preserveWords` is enabled by default, so messages are wrapped per row when possible instead of being sliced through the middle of a word. For classic board composition, `align: 'center'` is also the default.
 
 `paginate` is also enabled by default, so one long message can automatically become multiple board pages. Pair that with `autoplay: true` and `pageDuration` to rotate through those pages on a timer.
+
+For smoother behavior on phones and lower-power devices, the board now defaults to:
+
+- `respectReducedMotion: true` so it renders immediately when the user prefers reduced motion
+- `pauseWhenHidden: true` so autoplay timers stop in background tabs and resume when visible again
+- `responsive: true` so compact board styling can kick in on smaller or coarse-pointer layouts
+- `performanceMode: 'auto'` so mobile-style layouts can use lighter animation timing automatically
+- `flipDirection: 'forward'` by default for classic split-flap behavior, with an option to use the shortest path instead
 
 `shadow` controls the outer board drop shadow:
 
@@ -187,6 +200,7 @@ const faces = [
 const board = new Flipboard(container, {
   size: '6x22',
   faces,
+  flipDirection: 'shortest',
   pages: [
     {
       rows: [
@@ -201,6 +215,13 @@ const board = new Flipboard(container, {
 ```
 
 Order in `faces` defines rotation order. That gives you a path to authentic boards where decorative symbols, letters, blanks, and tone variants all exist as real flap faces.
+
+`flipDirection` controls how the board walks that wheel:
+
+- `forward` always advances in wheel order
+- `shortest` chooses the shortest available path, forward or backward
+
+If both directions are tied, `shortest` falls back to forward so behavior stays deterministic.
 
 ## Size Presets
 
@@ -282,6 +303,8 @@ Import `@c-hinck10/splitflap-js/styles.css`, then override the board variables o
   --fb-flap-background: var(--fb-tile-background);
 }
 ```
+
+When `responsive` is enabled, the board adds `data-compact="true"` on smaller/coarse-pointer layouts and adjusts spacing, radius, and font sizing. When `performanceMode` is active, it also adds `data-performance="true"` and uses lighter timing defaults.
 
 Useful visual-tuning variables:
 

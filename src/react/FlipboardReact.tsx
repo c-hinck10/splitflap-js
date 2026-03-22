@@ -37,6 +37,7 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
       theme,
       trigger,
       stagger,
+      staggerMode,
       flipDuration,
       charset,
       faces,
@@ -49,6 +50,11 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
       messages,
       pages,
       startIndex,
+      respectReducedMotion,
+      pauseWhenHidden,
+      responsive,
+      performanceMode,
+      flipDirection,
       onComplete
     },
     ref
@@ -85,6 +91,7 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
         theme,
         trigger,
         stagger,
+        staggerMode,
         flipDuration,
         charset,
         faces,
@@ -97,6 +104,11 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
         messages,
         pages,
         startIndex,
+        respectReducedMotion,
+        pauseWhenHidden,
+        responsive,
+        performanceMode,
+        flipDirection,
         onComplete
       }));
 
@@ -116,6 +128,7 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
       theme,
       trigger,
       stagger,
+      staggerMode,
       flipDuration,
       charset,
       faces,
@@ -127,6 +140,11 @@ export const Flipboard = forwardRef<FlipboardHandle, FlipboardProps>(
       paginate,
       pages,
       startIndex,
+      respectReducedMotion,
+      pauseWhenHidden,
+      responsive,
+      performanceMode,
+      flipDirection,
       onComplete
     ]);
 

@@ -65,6 +65,76 @@ describe('Flipboard', () => {
     board.destroy();
   });
 
+  it('passes flipDirection through to tile animation', async () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    const animateSpy = vi
+      .spyOn(Tile.prototype, 'animateTo')
+      .mockResolvedValue(undefined);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      flipDirection: 'shortest',
+      faces: [
+        { char: 'A', tone: 'default' },
+        { char: 'B', tone: 'default' },
+        { char: 'C', tone: 'default' },
+        { char: 'D', tone: 'default' }
+      ],
+      pages: [{ rows: [{ text: 'D' }] }]
+    });
+
+    board.play();
+    await Promise.resolve();
+
+    expect(animateSpy.mock.calls[0]?.[4]).toBe('shortest');
+
+    animateSpy.mockRestore();
+    board.destroy();
+  });
+
+  it('renders immediately when reduced motion is preferred', async () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: query === '(prefers-reduced-motion: reduce)',
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
+      }))
+    );
+
+    const animateSpy = vi
+      .spyOn(Tile.prototype, 'animateTo')
+      .mockResolvedValue(undefined);
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 4,
+      trigger: 'manual',
+      messages: ['TEST']
+    });
+
+    board.play();
+    await Promise.resolve();
+
+    expect(animateSpy).not.toHaveBeenCalled();
+    expect(container.querySelector('.fb-board')?.getAttribute('aria-label')).toBe('TEST');
+
+    animateSpy.mockRestore();
+    board.destroy();
+  });
+
   it('applies page themes to the board element', async () => {
     const container = document.createElement('div');
     document.body.append(container);
@@ -87,6 +157,43 @@ describe('Flipboard', () => {
     const renderedBoard = container.querySelector('.fb-board');
     expect(renderedBoard?.getAttribute('data-theme')).toBe('playful');
     expect(renderedBoard?.getAttribute('aria-label')).toBe('WELCOME');
+
+    board.destroy();
+  });
+
+  it('enables compact and performance board states on coarse small layouts', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    Object.defineProperty(container, 'clientWidth', {
+      configurable: true,
+      value: 240
+    });
+
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query: string) => ({
+        matches: query === '(pointer: coarse)',
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
+      }))
+    );
+
+    const board = new Flipboard(container, {
+      rows: 3,
+      cols: 15,
+      trigger: 'manual'
+    });
+
+    const renderedBoard = container.querySelector('.fb-board') as HTMLDivElement;
+    expect(renderedBoard.dataset.compact).toBe('true');
+    expect(renderedBoard.dataset.performance).toBe('true');
+    expect(renderedBoard.style.getPropertyValue('--fb-flip-duration')).toBe('90ms');
 
     board.destroy();
   });
@@ -403,6 +510,45 @@ describe('Flipboard', () => {
     expect(setImmediateSpy).not.toHaveBeenCalled();
 
     setImmediateSpy.mockRestore();
+    board.destroy();
+  });
+
+  it('pauses autoplay while the page is hidden and resumes when visible again', async () => {
+    vi.useFakeTimers();
+
+    const container = document.createElement('div');
+    document.body.append(container);
+
+    let hidden = false;
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => hidden
+    });
+
+    const board = new Flipboard(container, {
+      rows: 1,
+      cols: 1,
+      trigger: 'manual',
+      autoplay: true,
+      loop: false,
+      pageDuration: 100,
+      messages: ['A', 'B']
+    });
+
+    board.play(0);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(container.querySelector('.fb-glyph')?.textContent).toBe('A');
+
+    hidden = true;
+    document.dispatchEvent(new Event('visibilitychange'));
+    await vi.advanceTimersByTimeAsync(200);
+    expect(container.querySelector('.fb-glyph')?.textContent).toBe('A');
+
+    hidden = false;
+    document.dispatchEvent(new Event('visibilitychange'));
+    await vi.advanceTimersByTimeAsync(200);
+    expect(container.querySelector('.fb-glyph')?.textContent).toBe('B');
+
     board.destroy();
   });
 

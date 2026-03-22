@@ -113,6 +113,9 @@ body {
   --fb-gap: 10px;
   --fb-radius: 10px;
   --fb-font-size: clamp(22px, 2.7vw, 34px);
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .demo-board-host[data-preview-style="page-light"] {
@@ -244,11 +247,41 @@ body {
   .demo-shell {
     width: min(100% - 20px, 1160px);
     padding-top: 28px;
+    padding-bottom: 28px;
+  }
+
+  .demo-copy h1 {
+    font-size: clamp(2rem, 12vw, 3rem);
+    line-height: 1;
+  }
+
+  .demo-intro {
+    font-size: 0.94rem;
   }
 
   .demo-panel,
   .demo-controls {
     padding: 14px;
     border-radius: 18px;
+  }
+
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .demo-actions {
+    position: sticky;
+    bottom: 0;
+    padding-top: 8px;
+    background: linear-gradient(180deg, rgba(9, 9, 9, 0), rgba(9, 9, 9, 0.92) 28%);
+  }
+
+  .demo-shell[data-preview-style="page-light"] .demo-actions {
+    background: linear-gradient(180deg, rgba(248, 247, 244, 0), rgba(248, 247, 244, 0.96) 28%);
+  }
+
+  .demo-actions button {
+    flex: 1 1 calc(50% - 8px);
+    min-height: 44px;
   }
 }

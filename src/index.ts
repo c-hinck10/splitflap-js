@@ -3,13 +3,15 @@ export {
   DEFAULT_OPTIONS,
   FLIPBOARD_SIZES,
   Flipboard,
+  type PerformanceMode,
   type StaggerMode,
   type FlipboardOptions,
   type FlipboardSize,
   type TriggerMode
 } from './core/Flipboard';
 export {
-  createDefaultFaces
+  createDefaultFaces,
+  type FlipDirection
 } from './core/faces';
 export {
   layoutStructuredPages,

@@ -83,6 +83,31 @@ WELCOME TO THE HILTON BEAVER CREEK, WE APPRECIATE YOUR BUSINESS, CHECK THE FRONT
             </label>
 
             <label>
+              Responsive layout
+              <select id="responsive" name="responsive">
+                <option value="on" selected>on</option>
+                <option value="off">off</option>
+              </select>
+            </label>
+
+            <label>
+              Performance mode
+              <select id="performanceMode" name="performanceMode">
+                <option value="auto" selected>auto</option>
+                <option value="off">off</option>
+                <option value="on">on</option>
+              </select>
+            </label>
+
+            <label>
+              Flip direction
+              <select id="flipDirection" name="flipDirection">
+                <option value="forward" selected>forward</option>
+                <option value="shortest">shortest</option>
+              </select>
+            </label>
+
+            <label>
               Flip start
               <select id="staggerMode" name="staggerMode">
                 <option value="simultaneous" selected>simultaneous</option>
@@ -135,6 +160,10 @@ WELCOME TO THE HILTON BEAVER CREEK, WE APPRECIATE YOUR BUSINESS, CHECK THE FRONT
             <input id="autoplay" name="autoplay" type="checkbox" checked />
             Autoplay pages
           </label>
+
+          <p class="demo-help">
+            On small or touch-heavy screens, responsive mode automatically switches the board into a more compact layout. Performance mode can also reduce flip cost by shortening duration and stagger. Use flip direction to compare classic forward-only traversal with quickest-path behavior.
+          </p>
 
           <div class="demo-actions">
             <button type="button" id="apply">Apply messages</button>

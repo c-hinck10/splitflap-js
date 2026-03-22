@@ -1,6 +1,7 @@
 import {
   createFaceSequence,
   normalizeFace,
+  type FlipDirection,
   type ResolvedFlipboardFace
 } from './faces';
 import type { CellTone, FlipboardCell, FlipboardFace } from './message';
@@ -59,7 +60,8 @@ export class Tile {
     targetFace: ResolvedFlipboardFace,
     faceWheel: ResolvedFlipboardFace[],
     delay: number,
-    flipDuration: number
+    flipDuration: number,
+    direction: FlipDirection = 'forward'
   ): Promise<void> {
     if (targetFace.key === this.currentFace.key) {
       return Promise.resolve();
@@ -71,7 +73,8 @@ export class Tile {
       this.currentFace,
       targetFace,
       faceWheel,
-      toneChanged
+      toneChanged,
+      direction
     );
 
     return new Promise((resolve) => {

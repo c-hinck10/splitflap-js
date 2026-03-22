@@ -7,6 +7,8 @@ export type ResolvedFlipboardFace = {
   label?: string;
 };
 
+export type FlipDirection = 'forward' | 'shortest';
+
 const DECOR_TONES: CellTone[] = [
   'muted',
   'accent',
@@ -105,7 +107,8 @@ export function createFaceSequence(
   currentFace: ResolvedFlipboardFace,
   targetFace: ResolvedFlipboardFace,
   faceWheel: ResolvedFlipboardFace[],
-  forceSingleFlip = false
+  forceSingleFlip = false,
+  direction: FlipDirection = 'forward'
 ): ResolvedFlipboardFace[] {
   if (currentFace.key === targetFace.key && !forceSingleFlip) {
     return [];
@@ -118,19 +121,63 @@ export function createFaceSequence(
     return [targetFace];
   }
 
-  const sequence: ResolvedFlipboardFace[] = [];
-  let index = currentIndex;
-
-  while (index !== targetIndex) {
-    index = (index + 1) % faceWheel.length;
-    sequence.push(faceWheel[index] ?? targetFace);
-  }
+  const sequence =
+    direction === 'shortest'
+      ? createShortestSequence(currentIndex, targetIndex, faceWheel)
+      : createForwardSequence(currentIndex, targetIndex, faceWheel);
 
   if (sequence.length === 0 && forceSingleFlip) {
     return [targetFace];
   }
 
   return sequence;
+}
+
+function createForwardSequence(
+  currentIndex: number,
+  targetIndex: number,
+  faceWheel: ResolvedFlipboardFace[]
+): ResolvedFlipboardFace[] {
+  const sequence: ResolvedFlipboardFace[] = [];
+  let index = currentIndex;
+
+  while (index !== targetIndex) {
+    index = (index + 1) % faceWheel.length;
+    sequence.push(faceWheel[index] ?? faceWheel[targetIndex]!);
+  }
+
+  return sequence;
+}
+
+function createBackwardSequence(
+  currentIndex: number,
+  targetIndex: number,
+  faceWheel: ResolvedFlipboardFace[]
+): ResolvedFlipboardFace[] {
+  const sequence: ResolvedFlipboardFace[] = [];
+  let index = currentIndex;
+
+  while (index !== targetIndex) {
+    index = (index - 1 + faceWheel.length) % faceWheel.length;
+    sequence.push(faceWheel[index] ?? faceWheel[targetIndex]!);
+  }
+
+  return sequence;
+}
+
+function createShortestSequence(
+  currentIndex: number,
+  targetIndex: number,
+  faceWheel: ResolvedFlipboardFace[]
+): ResolvedFlipboardFace[] {
+  const forward = createForwardSequence(currentIndex, targetIndex, faceWheel);
+  const backward = createBackwardSequence(currentIndex, targetIndex, faceWheel);
+
+  if (backward.length < forward.length) {
+    return backward;
+  }
+
+  return forward;
 }
 
 export function normalizeFace(

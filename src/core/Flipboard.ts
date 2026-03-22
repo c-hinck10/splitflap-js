@@ -3,6 +3,7 @@ import {
   extendFaceWheel,
   resolveFace,
   resolveFaceWheel,
+  type FlipDirection,
   type ResolvedFlipboardFace
 } from './faces';
 import {
@@ -24,6 +25,7 @@ import { observeOnce } from './visibility';
 export type TriggerMode = 'load' | 'visible' | 'manual';
 export type FlipboardSize = '3x15' | '6x22';
 export type StaggerMode = 'simultaneous' | 'sequence' | 'row';
+export type PerformanceMode = 'auto' | 'off' | 'on';
 
 export const FLIPBOARD_SIZES: Record<FlipboardSize, { rows: number; cols: number }> = {
   '3x15': { rows: 3, cols: 15 },
@@ -53,6 +55,11 @@ export type FlipboardOptions = {
   messages?: string[];
   pages?: FlipboardPage[];
   startIndex?: number;
+  respectReducedMotion?: boolean;
+  pauseWhenHidden?: boolean;
+  responsive?: boolean;
+  performanceMode?: PerformanceMode;
+  flipDirection?: FlipDirection;
   onComplete?: (message: string, index: number) => void;
 };
 
@@ -81,7 +88,12 @@ export const DEFAULT_OPTIONS: Required<Omit<FlipboardOptions, 'onComplete'>> = {
   paginate: true,
   messages: [''],
   pages: [],
-  startIndex: 0
+  startIndex: 0,
+  respectReducedMotion: true,
+  pauseWhenHidden: true,
+  responsive: true,
+  performanceMode: 'auto',
+  flipDirection: 'forward'
 };
 
 export class Flipboard {
@@ -94,6 +106,8 @@ export class Flipboard {
   private readonly tiles: Tile[] = [];
   private playlist: MessagePage[] = [emptyPage()];
   private disconnectVisibility?: () => void;
+  private removeVisibilityListener?: () => void;
+  private removeResizeHandling?: () => void;
   private currentIndex: number;
   private currentSignature = '';
   private hasAnimatedCurrentState = false;
@@ -101,6 +115,7 @@ export class Flipboard {
   private isPlaying = false;
   private queuedPlayback?: { page: MessagePage; index: number };
   private autoplayTimer?: number;
+  private resumeAutoplayOnVisible = false;
 
   constructor(container: HTMLElement, options: FlipboardOptions = {}) {
     this.container = container;
@@ -130,6 +145,8 @@ export class Flipboard {
 
     this.createTiles();
     this.renderBlankState();
+    this.installVisibilityHandling();
+    this.installResponsiveHandling();
     this.installTrigger();
   }
 
@@ -203,6 +220,8 @@ export class Flipboard {
   destroy(): void {
     this.destroyed = true;
     this.disconnectVisibility?.();
+    this.removeVisibilityListener?.();
+    this.removeResizeHandling?.();
     this.clearAutoplayTimer();
 
     for (const tile of this.tiles) {
@@ -249,11 +268,62 @@ export class Flipboard {
     }
   }
 
+  private installVisibilityHandling(): void {
+    if (!this.options.pauseWhenHidden || typeof document === 'undefined') {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        this.resumeAutoplayOnVisible = this.autoplayTimer !== undefined;
+        this.clearAutoplayTimer();
+        return;
+      }
+
+      if (this.resumeAutoplayOnVisible) {
+        this.resumeAutoplayOnVisible = false;
+        this.scheduleAutoplay();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    this.removeVisibilityListener = () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }
+
+  private installResponsiveHandling(): void {
+    this.updateResponsiveState();
+
+    if (!this.options.responsive || typeof window === 'undefined') {
+      return;
+    }
+
+    const handleResize = () => {
+      this.updateResponsiveState();
+    };
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => {
+        handleResize();
+      });
+      observer.observe(this.container);
+      this.removeResizeHandling = () => observer.disconnect();
+      return;
+    }
+
+    window.addEventListener('resize', handleResize);
+    this.removeResizeHandling = () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }
+
   private async applyPage(page: MessagePage, animate: boolean): Promise<void> {
     if (this.destroyed) {
       return;
     }
 
+    const shouldAnimate = animate && !this.shouldReduceMotion();
     const normalized = this.resolveCells(page);
     const resolvedFaces = normalized.map((cell) => resolveFace(cell, this.faceWheel));
     const signature = serializeFaces(resolvedFaces, page.theme ?? this.options.theme);
@@ -263,12 +333,13 @@ export class Flipboard {
     this.board.dataset.theme = page.theme ?? this.options.theme;
     this.updateAccessibleText(message);
 
-    if (!animate) {
+    if (!shouldAnimate) {
       for (let index = 0; index < normalized.length; index += 1) {
         this.tiles[index]?.setImmediate(resolvedFaces[index] ?? emptyFace());
       }
       this.currentSignature = signature;
       this.hasAnimatedCurrentState = false;
+      this.scheduleAutoplay();
       return;
     }
 
@@ -292,7 +363,8 @@ export class Flipboard {
           face,
           this.faceWheel,
           this.getTileDelay(index),
-          this.options.flipDuration
+          this.getEffectiveFlipDuration(),
+          this.options.flipDirection
         ) ?? Promise.resolve()
       )
     );
@@ -393,11 +465,13 @@ export class Flipboard {
   }
 
   private getTileDelay(index: number): number {
+    const stagger = this.getEffectiveStagger();
+
     switch (this.options.staggerMode) {
       case 'sequence':
-        return index * this.options.stagger;
+        return index * stagger;
       case 'row':
-        return Math.floor(index / this.options.cols) * this.options.stagger;
+        return Math.floor(index / this.options.cols) * stagger;
       case 'simultaneous':
       default:
         return 0;
@@ -407,13 +481,86 @@ export class Flipboard {
   private scheduleAutoplay(): void {
     this.clearAutoplayTimer();
 
-    if (!this.options.autoplay || this.playlist.length <= 1 || this.destroyed) {
+    if (
+      !this.options.autoplay ||
+      this.playlist.length <= 1 ||
+      this.destroyed ||
+      (this.options.pauseWhenHidden && typeof document !== 'undefined' && document.hidden)
+    ) {
       return;
     }
 
     this.autoplayTimer = window.setTimeout(() => {
       this.next();
     }, this.options.pageDuration);
+  }
+
+  private shouldReduceMotion(): boolean {
+    return (
+      this.options.respectReducedMotion &&
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }
+
+  private updateResponsiveState(): void {
+    const compact = this.options.responsive && this.shouldUseCompactLayout();
+    this.board.dataset.compact = compact ? 'true' : 'false';
+    this.board.dataset.performance = this.isPerformanceModeEnabled()
+      ? 'true'
+      : 'false';
+    this.board.style.setProperty(
+      '--fb-flip-duration',
+      `${this.getEffectiveFlipDuration()}ms`
+    );
+  }
+
+  private shouldUseCompactLayout(): boolean {
+    const width = this.container.clientWidth || this.container.getBoundingClientRect().width;
+    const maxTileWidth = width > 0 ? width / Math.max(1, this.options.cols) : 0;
+
+    return (
+      this.hasCoarsePointer() ||
+      (width > 0 && width <= 640) ||
+      (maxTileWidth > 0 && maxTileWidth < 32)
+    );
+  }
+
+  private hasCoarsePointer(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(pointer: coarse)').matches
+    );
+  }
+
+  private isPerformanceModeEnabled(): boolean {
+    if (this.options.performanceMode === 'on') {
+      return true;
+    }
+
+    if (this.options.performanceMode === 'off') {
+      return false;
+    }
+
+    return this.board.dataset.compact === 'true' || this.hasCoarsePointer();
+  }
+
+  private getEffectiveStagger(): number {
+    if (!this.isPerformanceModeEnabled()) {
+      return this.options.stagger;
+    }
+
+    return Math.min(this.options.stagger, 20);
+  }
+
+  private getEffectiveFlipDuration(): number {
+    if (!this.isPerformanceModeEnabled()) {
+      return this.options.flipDuration;
+    }
+
+    return Math.min(this.options.flipDuration, 90);
   }
 
   private clearAutoplayTimer(): void {

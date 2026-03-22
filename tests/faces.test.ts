@@ -80,4 +80,53 @@ describe('face wheel helpers', () => {
       ' :purple'
     ]);
   });
+
+  it('can choose the shortest path through the wheel', () => {
+    const wheel = resolveFaceWheel(
+      [
+        { char: 'A', tone: 'default' },
+        { char: 'B', tone: 'default' },
+        { char: 'C', tone: 'default' },
+        { char: 'D', tone: 'default' }
+      ],
+      'ABCD'
+    );
+
+    const sequence = createFaceSequence(
+      normalizeFace({ char: 'A', tone: 'default' }),
+      normalizeFace({ char: 'D', tone: 'default' }),
+      wheel,
+      false,
+      'shortest'
+    );
+
+    expect(sequence.map((face) => `${face.char}:${face.tone}`)).toEqual([
+      'D:default'
+    ]);
+  });
+
+  it('keeps forward traversal when shortest mode ties', () => {
+    const wheel = resolveFaceWheel(
+      [
+        { char: 'A', tone: 'default' },
+        { char: 'B', tone: 'default' },
+        { char: 'C', tone: 'default' },
+        { char: 'D', tone: 'default' }
+      ],
+      'ABCD'
+    );
+
+    const sequence = createFaceSequence(
+      normalizeFace({ char: 'A', tone: 'default' }),
+      normalizeFace({ char: 'C', tone: 'default' }),
+      wheel,
+      false,
+      'shortest'
+    );
+
+    expect(sequence.map((face) => `${face.char}:${face.tone}`)).toEqual([
+      'B:default',
+      'C:default'
+    ]);
+  });
 });
